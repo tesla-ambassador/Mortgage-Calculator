@@ -16,7 +16,8 @@ const config: Config = {
       colors: {
         lime: "#d7da2f",
         displaybg: "#044532",
-        bluebg: "#bfdbfe",
+        bluebg: "#e3f4fc",
+        error: "#d73329",
       },
     },
   },

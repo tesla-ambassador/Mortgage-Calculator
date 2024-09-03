@@ -1,6 +1,11 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { DisplayOutputTypes } from "@/@types/DisplayOutputTypes";
 import { useForm, SubmitHandler, FieldValues } from "react-hook-form";
+import CalcIcon from "./CalcIcon";
+import { repayments, interest, formatDisplay } from "@/logic/mortgage";
+import { DisplayContext } from "@/context/DisplayContext";
+import { format } from "path";
 
 interface calcTypes {
   amount: string;
@@ -16,16 +21,75 @@ const mortgageValues: calcTypes = {
   mortgageType: "",
 };
 
+// Input Class Strings
+const inputValidClass: string =
+  "w-full border-slate-400 border-[1.5px] rounded-md py-2 px-[60px] peer focus:border-lime outline-lime leading-[30px] overflow-hidden [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
+
+const inputInvalidClass: string =
+  "w-full border-error border-[1.5px] rounded-md py-2 px-[30px] peer focus:border-error outline-error leading-[30px] overflow-hidden [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
+
+const input2ValidClass: string =
+  "w-full border-slate-400 border-[1.5px] rounded-md py-2 px-[30px] peer focus:border-lime outline-lime leading-[30px] overflow-hidden [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
+
+const input2InvalidClass: string =
+  "w-full border-error border-[1.5px] rounded-md py-2 px-[60px] peer focus:border-error outline-error leading-[30px] overflow-hidden [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
+
+// Spans (Symbals) Class Strings
+const spanInvalidClass: string =
+  "absolute bg-error text-white left-[2px] h-[90%] w-[50px] flex items-center justify-center rounded-tl-md rounded-bl-md";
+
+const spanValidClass: string =
+  "absolute bg-bluebg peer-focus:bg-lime left-[2px] h-[90%] w-[50px] flex items-center justify-center rounded-tl-md rounded-bl-md";
+
+const span2InvalidClass: string =
+  "absolute bg-error text-white right-[2px] h-[90%] w-[60px] flex items-center justify-center rounded-tr-md rounded-br-md";
+
+const span2ValidClass: string =
+  "absolute bg-bluebg peer-focus:bg-lime right-[2px] h-[90%] w-[60px] flex items-center justify-center rounded-tr-md rounded-br-md";
+
 export default function Form() {
+  const {
+    setIsSubmitted,
+    handleDisplaySubtotalChange,
+    handleDisplayTotalChange,
+  } = useContext(DisplayContext) as DisplayOutputTypes;
+
   const {
     register,
     handleSubmit,
+    clearErrors,
+    setError,
     formState: { errors },
   } = useForm();
+
   const [calcValues, setCalcValues] = useState(mortgageValues);
+
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    console.log(data);
-    setCalcValues(mortgageValues);
+    if (typeof parseFloat(data.amount) !== "number") {
+      console.log("I work")
+      setError("amount", { type: "custom" });
+      setIsSubmitted(false);
+      return;
+    }
+    console.log(calcValues.amount);
+    if (data.mortgageType === "repayment") {
+      const [resultMonth, resultTerm] = repayments(
+        data.amount,
+        data.rate,
+        data.term
+      );
+      handleDisplayTotalChange(formatDisplay(resultMonth));
+      handleDisplaySubtotalChange(formatDisplay(resultTerm));
+    } else {
+      const [resultMonth, resultTerm] = interest(
+        data.amount,
+        data.rate,
+        data.term
+      );
+      handleDisplayTotalChange(formatDisplay(resultMonth));
+      handleDisplaySubtotalChange(formatDisplay(resultTerm));
+    }
+    setIsSubmitted(true);
   };
 
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,91 +97,153 @@ export default function Form() {
       ...calcValues,
       [e.target.name]: e.target.value,
     });
+    clearErrors(e.target.name);
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 py-8 w-full sm:px-12 sm:py-6 md:px-6">
       <div className="flex items-center justify-between">
-        <h1>Mortgage Calculator</h1>
-        <button>Clear all</button>
+        <h1 className="text-[#133041] font-bold text-lg lg:text-xl">
+          Mortgage Calculator
+        </h1>
+        <button
+          className="underline underline-offset-2 text-slate-500/80 hover:text-slate-800 transition-all duration-75 active:scale-95"
+          onClick={() => {
+            setCalcValues(mortgageValues);
+            setIsSubmitted(false);
+          }}
+        >
+          Clear all
+        </button>
       </div>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="mt-4 flex flex-col gap-y-3"
+      >
         <div>
           <label htmlFor={"amount"}>Mortgage Amount</label>
-          <input
-            type="number"
-            id="Mortgage"
-            value={calcValues.amount}
-            className="w-full border-bluebg border-2"
-            {...register("amount", { required: true })}
-            aria-invalid={errors.amount ? "true" : "false"}
-            onChange={changeHandler}
-          />
-          {errors.amount?.type === "required" && (
-            <span role="alert">Error</span>
-          )}
-        </div>
-        <div>
-          <div>
-            <label htmlFor={"term"}>Mortgage Term</label>
+          <div className="w-full relative flex items-center">
             <input
-              type="number"
+              type="text"
               id="Mortgage"
-              value={calcValues.term}
-              className="w-full border-bluebg border-2"
-              {...register("term", { required: true })}
-              aria-invalid={errors.term ? "true" : "false"}
+              value={calcValues.amount}
+              className={errors.amount ? inputInvalidClass : inputValidClass}
+              {...register("amount", { required: true, valueAsNumber: true })}
+              aria-invalid={errors.amount ? "true" : "false"}
               onChange={changeHandler}
             />
+            <span className={errors.amount ? spanInvalidClass : spanValidClass}>
+              £
+            </span>
+          </div>
+          {errors.amount?.type === "required" && (
+            <p role="alert" className="text-error text-sm mt-1">
+              This field is required
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col gap-3 lg:flex-row lg:justify-between lg:items-center">
+          <div>
+            <label htmlFor={"term"}>Mortgage Term</label>
+            <div className="w-full relative flex items-center">
+              <input
+                type="number"
+                id="Mortgage"
+                value={calcValues.term}
+                className={errors.term ? input2InvalidClass : input2ValidClass}
+                {...register("term", { required: true })}
+                aria-invalid={errors.term ? "true" : "false"}
+                onChange={changeHandler}
+              />
+              <span
+                className={errors.term ? span2InvalidClass : span2ValidClass}
+              >
+                years
+              </span>
+            </div>
             {errors.term?.type === "required" && (
-              <span role="alert">Error</span>
+              <p role="alert" className="text-error text-sm mt-1">
+                This field is required
+              </p>
             )}
           </div>
           <div>
-            <label htmlFor={"rate"}>Interest Rate</label>
-            <input
-              type="number"
-              id="Mortgage"
-              value={calcValues.rate}
-              className="w-full border-bluebg border-2"
-              {...register("rate", { required: true })}
-              aria-invalid={errors.rate ? "true" : "false"}
-              onChange={changeHandler}
-            />
+            <label htmlFor={"rate"}>Mortgage Rate</label>
+            <div className="w-full relative flex items-center">
+              <input
+                type="number"
+                id="Mortgage"
+                value={calcValues.rate}
+                className={
+                  errors.amount ? input2InvalidClass : input2ValidClass
+                }
+                {...register("rate", { required: true })}
+                aria-invalid={errors.rate ? "true" : "false"}
+                onChange={changeHandler}
+              />
+              <span
+                className={errors.rate ? span2InvalidClass : span2ValidClass}
+              >
+                %
+              </span>
+            </div>
             {errors.rate?.type === "required" && (
-              <span role="alert">Error</span>
+              <p role="alert" className="text-error text-sm mt-1">
+                This field is required
+              </p>
             )}
           </div>
         </div>
         {/* Radio Buttons */}
-        <div>
-          <div>
+        <div className="mt-6 flex flex-col items-center gap-y-3">
+          <div className="w-full flex gap-3 items-center px-[30px] py-3 border-slate-400 border-[1.5px] hover:border-lime hover:cursor-pointer has-[:checked]:border-lime has-[:checked]:bg-lime/10">
             <input
               type="radio"
               value={"repayment"}
+              id="repayment"
               {...register("mortgageType", { required: true })}
               aria-invalid={errors.mortgageType ? "true" : "false"}
               checked={calcValues.mortgageType === "repayment"}
               onChange={changeHandler}
+              className="appearance-none w-4 h-4 rounded-full peer border-slate-400 border-[1.5px] checked:border-lime relative
+              after:absolute after:top-0 after:left-0 after:bg-white checked:after:bg-lime after:h-full after:w-full after:rounded-full after:border-white after:border-[1px]"
             />
-            <label htmlFor={"mortgageType"}>Repayment</label>
+            <label htmlFor={"repayment"} className="hover:cursor-pointer">
+              Repayment
+            </label>
           </div>
-          <div>
+          <div className="w-full flex gap-3 items-center px-[30px] py-3 border-slate-400 border-[1.5px] hover:border-lime hover:cursor-pointer has-[:checked]:border-lime has-[:checked]:bg-lime/10">
             <input
               type="radio"
               value={"interest"}
+              id="interest"
               {...register("mortgageType", { required: true })}
               aria-invalid={errors.mortgageType ? "true" : "false"}
               checked={calcValues.mortgageType === "interest"}
               onChange={changeHandler}
+              className="appearance-none w-4 h-4 rounded-full peer border-slate-400 border-[1.5px] checked:border-lime relative
+              after:absolute after:top-0 after:left-0 after:bg-white checked:after:bg-lime after:h-full after:w-full after:rounded-full after:border-white after:border-[1px]"
             />
-            <label htmlFor={"mortgageType"}>Interest Only</label>
+            <label htmlFor={"interest"} className="hover:cursor-pointer">
+              Interest Only
+            </label>
           </div>
           {errors.mortgageType?.type === "required" && (
-            <span role="alert">Error</span>
+            <p role="alert" className="self-start text-error text-sm mt-1">
+              This field is required
+            </p>
           )}
         </div>
-        <button type="submit">Submit</button>
+        <button
+          type="submit"
+          className="mt-3 w-full px-[30px] py-4 flex gap-3 items-center rounded-3xl bg-lime hover:bg-lime/50 text-[#133041] hover:text-[#133041]/80 justify-center
+          active:scale-95 transition-all duration-150 lg:max-w-[300px]"
+        >
+          <span className="text-white">
+            <CalcIcon />
+          </span>
+          <span>Calculate Repayments</span>
+        </button>
       </form>
     </div>
   );

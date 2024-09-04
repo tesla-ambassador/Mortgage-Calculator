@@ -227,7 +227,7 @@ export default function Form() {
             )}
           </div>
           <div>
-            <label htmlFor={"rate"}>Mortgage Rate</label>
+            <label htmlFor={"rate"}>Interest Rate</label>
             <div className="w-full relative flex items-center">
               <input
                 type="number"

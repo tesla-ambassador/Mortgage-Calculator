@@ -98,4 +98,4 @@ Ps: I used a color picker to get the colors right... The descriptions in the HTM
 
 Remember... Rome wasn't built in one day, but a sand castle was... I don't know what that's supposed to mean either but if you're and employer reading this, hire me... I think I'm funny.
 
-[Programming is easy, it's just perspective:](./public/images/selfdrivingmeme.jpeg)
+![Programming is easy, it's just perspective:](./public/images/selfdrivingmeme.jpeg)

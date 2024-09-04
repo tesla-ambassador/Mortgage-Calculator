@@ -9,12 +9,20 @@ export default function Display() {
     DisplayContext
   ) as DisplayOutputTypes;
   return (
-    <div className="min-h-[30vh] w-full bg-[#133040] flex items-center justify-center md:rounded-bl-[4.5rem]">
+    <div className="min-h-[30vh] w-full bg-[#133040] flex flex-col sm:flex-row items-center justify-center md:rounded-bl-[4.5rem]">
       {isSubmitted ? (
         <DisplayResults total={displayTotal} subtotal={displaySubtotal} />
       ) : (
         <DisplayIdle />
       )}
+      <div className="py-3 sm:hidden text-gray-300 flex flex-col items-center gap-2">
+        <span>A Frontend Mentor Project developed by&#58;</span>
+        <a href="https://www.frontendmentor.io/profile/tesla-ambassador">
+          <div className="w-[50px] h-[50px] rounded-full overflow-hidden hover:cursor-pointer hover:scale-105 active:scale-90 transition-all duration-150">
+            <img src="/images/fem_pfp.jpeg" alt="Profile" />
+          </div>
+        </a>
+      </div>
     </div>
   );
 }

@@ -26,13 +26,13 @@ const inputValidClass: string =
   "w-full border-slate-400 border-[1.5px] rounded-md py-2 px-[60px] peer focus:border-lime outline-lime leading-[30px] overflow-hidden [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
 
 const inputInvalidClass: string =
-  "w-full border-error border-[1.5px] rounded-md py-2 px-[30px] peer focus:border-error outline-error leading-[30px] overflow-hidden [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
+  "w-full border-error border-[1.5px] rounded-md py-2 px-[60px] peer focus:border-error outline-error leading-[30px] overflow-hidden [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
 
 const input2ValidClass: string =
   "w-full border-slate-400 border-[1.5px] rounded-md py-2 px-[30px] peer focus:border-lime outline-lime leading-[30px] overflow-hidden [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
 
 const input2InvalidClass: string =
-  "w-full border-error border-[1.5px] rounded-md py-2 px-[60px] peer focus:border-error outline-error leading-[30px] overflow-hidden [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
+  "w-full border-error border-[1.5px] rounded-md py-2 px-[30px] peer focus:border-error outline-error leading-[30px] overflow-hidden [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none";
 
 // Spans (Symbals) Class Strings
 const spanInvalidClass: string =
@@ -49,6 +49,7 @@ const span2ValidClass: string =
 
 export default function Form() {
   const {
+    isSubmitted,
     setIsSubmitted,
     handleDisplaySubtotalChange,
     handleDisplayTotalChange,
@@ -65,39 +66,87 @@ export default function Form() {
   const [calcValues, setCalcValues] = useState(mortgageValues);
 
   const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    if (typeof parseFloat(data.amount) !== "number") {
-      console.log("I work")
-      setError("amount", { type: "custom" });
-      setIsSubmitted(false);
-      return;
-    }
-    console.log(calcValues.amount);
+    data.amount = calcValues.amount.replace(/,/g, "");
     if (data.mortgageType === "repayment") {
       const [resultMonth, resultTerm] = repayments(
         data.amount,
         data.rate,
         data.term
       );
-      handleDisplayTotalChange(formatDisplay(resultMonth));
-      handleDisplaySubtotalChange(formatDisplay(resultTerm));
+      if (Number.isNaN(resultMonth) || Number.isNaN(resultTerm)) {
+        setError("amount", { type: "valueAsNumber" });
+        return;
+      } else {
+        handleDisplayTotalChange(formatDisplay(resultMonth));
+        handleDisplaySubtotalChange(formatDisplay(resultTerm));
+      }
     } else {
       const [resultMonth, resultTerm] = interest(
         data.amount,
         data.rate,
         data.term
       );
-      handleDisplayTotalChange(formatDisplay(resultMonth));
-      handleDisplaySubtotalChange(formatDisplay(resultTerm));
+      if (Number.isNaN(resultMonth) || Number.isNaN(resultTerm)) {
+        setError("amount", { type: "valueAsNumber" });
+        return;
+      } else {
+        handleDisplayTotalChange(formatDisplay(resultMonth));
+        handleDisplaySubtotalChange(formatDisplay(resultTerm));
+      }
     }
     setIsSubmitted(true);
   };
 
+// Make-shift function to format input
+  const formatNumber = (value: string) => {
+    return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCalcValues({
-      ...calcValues,
-      [e.target.name]: e.target.value,
-    });
-    clearErrors(e.target.name);
+    if (e.target.name === "amount") {
+      setCalcValues({
+        ...calcValues,
+        [e.target.name]: e.target.value.replace(/\D/g, ""),
+      });
+      clearErrors(e.target.name);
+    } else {
+      setCalcValues({
+        ...calcValues,
+        [e.target.name]: e.target.value,
+      });
+      clearErrors(e.target.name);
+    }
+
+    // Some extra feature
+    if (isSubmitted) {
+      if (e.target.name === "mortgageType") {
+        if (
+          calcValues.amount !== "" &&
+          calcValues.rate !== "" &&
+          calcValues.term !== ""
+        ) {
+          if (e.target.value === "repayment") {
+            const [resultMonth, resultTerm] = repayments(
+              parseFloat(calcValues.amount),
+              parseFloat(calcValues.rate),
+              parseFloat(calcValues.term)
+            );
+            handleDisplayTotalChange(formatDisplay(resultMonth));
+            handleDisplaySubtotalChange(formatDisplay(resultTerm));
+          } else {
+            const [resultMonth, resultTerm] = interest(
+              parseFloat(calcValues.amount),
+              parseFloat(calcValues.rate),
+              parseFloat(calcValues.term)
+            );
+            handleDisplayTotalChange(formatDisplay(resultMonth));
+            handleDisplaySubtotalChange(formatDisplay(resultTerm));
+          }
+        } else {
+          setIsSubmitted(false);
+        }
+      }
+    }
   };
 
   return (
@@ -111,6 +160,7 @@ export default function Form() {
           onClick={() => {
             setCalcValues(mortgageValues);
             setIsSubmitted(false);
+            clearErrors();
           }}
         >
           Clear all
@@ -125,8 +175,9 @@ export default function Form() {
           <div className="w-full relative flex items-center">
             <input
               type="text"
+              autoComplete="off"
               id="Mortgage"
-              value={calcValues.amount}
+              value={formatNumber(calcValues.amount)}
               className={errors.amount ? inputInvalidClass : inputValidClass}
               {...register("amount", { required: true, valueAsNumber: true })}
               aria-invalid={errors.amount ? "true" : "false"}
@@ -139,6 +190,11 @@ export default function Form() {
           {errors.amount?.type === "required" && (
             <p role="alert" className="text-error text-sm mt-1">
               This field is required
+            </p>
+          )}
+          {errors.amount?.type === "valueAsNumber" && (
+            <p role="alert" className="text-error text-sm mt-1">
+              This input is invalid
             </p>
           )}
         </div>
@@ -174,9 +230,7 @@ export default function Form() {
                 type="number"
                 id="Mortgage"
                 value={calcValues.rate}
-                className={
-                  errors.amount ? input2InvalidClass : input2ValidClass
-                }
+                className={errors.rate ? input2InvalidClass : input2ValidClass}
                 {...register("rate", { required: true })}
                 aria-invalid={errors.rate ? "true" : "false"}
                 onChange={changeHandler}

@@ -97,7 +97,7 @@ export default function Form() {
     setIsSubmitted(true);
   };
 
-// Make-shift function to format input
+  // Make-shift function to format input
   const formatNumber = (value: string) => {
     return value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
@@ -157,6 +157,7 @@ export default function Form() {
         </h1>
         <button
           className="underline underline-offset-2 text-slate-500/80 hover:text-slate-800 transition-all duration-75 active:scale-95"
+          tabIndex={1}
           onClick={() => {
             setCalcValues(mortgageValues);
             setIsSubmitted(false);
@@ -177,6 +178,7 @@ export default function Form() {
               type="text"
               autoComplete="off"
               id="Mortgage"
+              tabIndex={2}
               value={formatNumber(calcValues.amount)}
               className={errors.amount ? inputInvalidClass : inputValidClass}
               {...register("amount", { required: true, valueAsNumber: true })}
@@ -206,6 +208,7 @@ export default function Form() {
                 type="number"
                 id="Mortgage"
                 value={calcValues.term}
+                tabIndex={3}
                 className={errors.term ? input2InvalidClass : input2ValidClass}
                 {...register("term", { required: true })}
                 aria-invalid={errors.term ? "true" : "false"}
@@ -230,6 +233,7 @@ export default function Form() {
                 type="number"
                 id="Mortgage"
                 value={calcValues.rate}
+                tabIndex={4}
                 className={errors.rate ? input2InvalidClass : input2ValidClass}
                 {...register("rate", { required: true })}
                 aria-invalid={errors.rate ? "true" : "false"}
@@ -255,6 +259,7 @@ export default function Form() {
               type="radio"
               value={"repayment"}
               id="repayment"
+              tabIndex={5}
               {...register("mortgageType", { required: true })}
               aria-invalid={errors.mortgageType ? "true" : "false"}
               checked={calcValues.mortgageType === "repayment"}
@@ -292,6 +297,7 @@ export default function Form() {
           type="submit"
           className="mt-3 w-full px-[30px] py-4 flex gap-3 items-center rounded-3xl bg-lime hover:bg-lime/50 text-[#133041] hover:text-[#133041]/80 justify-center
           active:scale-95 transition-all duration-150 lg:max-w-[300px]"
+          tabIndex={6}
         >
           <span className="text-white">
             <CalcIcon />

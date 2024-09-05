@@ -168,7 +168,7 @@ export default function Form() {
       </div>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="mt-4 flex flex-col gap-y-6"
+        className="mt-4 flex flex-col gap-y-4 lg:mt-14"
       >
         <div>
           <label htmlFor={"amount"} className="text-slate-500/80">

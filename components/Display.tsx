@@ -9,7 +9,7 @@ export default function Display() {
     DisplayContext
   ) as DisplayOutputTypes;
   return (
-    <div className="min-h-[30vh] w-full bg-[#133040] flex flex-col sm:flex-row items-center justify-center md:rounded-bl-[4.5rem]">
+    <div className="min-h-[30vh] w-full bg-[#133040] flex flex-col sm:flex-row items-center justify-center md:rounded-bl-[4.5rem] lg:py-24">
       {isSubmitted ? (
         <DisplayResults total={displayTotal} subtotal={displaySubtotal} />
       ) : (

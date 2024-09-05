@@ -157,7 +157,6 @@ export default function Form() {
         </h1>
         <button
           className="underline underline-offset-2 text-slate-500/80 hover:text-slate-800 transition-all duration-75 active:scale-95"
-          tabIndex={1}
           onClick={() => {
             setCalcValues(mortgageValues);
             setIsSubmitted(false);
@@ -169,16 +168,17 @@ export default function Form() {
       </div>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="mt-4 flex flex-col gap-y-3"
+        className="mt-4 flex flex-col gap-y-6"
       >
         <div>
-          <label htmlFor={"amount"}>Mortgage Amount</label>
+          <label htmlFor={"amount"} className="text-slate-500/80">
+            Mortgage Amount
+          </label>
           <div className="w-full relative flex items-center">
             <input
               type="text"
               autoComplete="off"
-              id="Mortgage"
-              tabIndex={2}
+              id="amount"
               value={formatNumber(calcValues.amount)}
               className={errors.amount ? inputInvalidClass : inputValidClass}
               {...register("amount", { required: true, valueAsNumber: true })}
@@ -202,13 +202,14 @@ export default function Form() {
         </div>
         <div className="flex flex-col gap-3 lg:flex-row lg:justify-between lg:items-center">
           <div>
-            <label htmlFor={"term"}>Mortgage Term</label>
+            <label htmlFor={"term"} className="text-slate-500/80">
+              Mortgage Term
+            </label>
             <div className="w-full relative flex items-center">
               <input
                 type="number"
-                id="Mortgage"
+                id="term"
                 value={calcValues.term}
-                tabIndex={3}
                 className={errors.term ? input2InvalidClass : input2ValidClass}
                 {...register("term", { required: true })}
                 aria-invalid={errors.term ? "true" : "false"}
@@ -227,13 +228,14 @@ export default function Form() {
             )}
           </div>
           <div>
-            <label htmlFor={"rate"}>Interest Rate</label>
+            <label htmlFor={"rate"} className="text-slate-500/80">
+              Interest Rate
+            </label>
             <div className="w-full relative flex items-center">
               <input
                 type="number"
-                id="Mortgage"
+                id="rate"
                 value={calcValues.rate}
-                tabIndex={4}
                 className={errors.rate ? input2InvalidClass : input2ValidClass}
                 {...register("rate", { required: true })}
                 aria-invalid={errors.rate ? "true" : "false"}
@@ -254,12 +256,12 @@ export default function Form() {
         </div>
         {/* Radio Buttons */}
         <div className="mt-6 flex flex-col items-center gap-y-3">
+          <span className="self-start text-slate-500/80">Mortgage Type</span>
           <div className="w-full flex gap-3 items-center px-[30px] py-3 border-slate-400 border-[1.5px] hover:border-lime hover:cursor-pointer has-[:checked]:border-lime has-[:checked]:bg-lime/10">
             <input
               type="radio"
               value={"repayment"}
               id="repayment"
-              tabIndex={5}
               {...register("mortgageType", { required: true })}
               aria-invalid={errors.mortgageType ? "true" : "false"}
               checked={calcValues.mortgageType === "repayment"}
@@ -267,7 +269,10 @@ export default function Form() {
               className="appearance-none w-4 h-4 rounded-full peer border-slate-400 border-[1.5px] checked:border-lime relative
               after:absolute after:top-0 after:left-0 after:bg-white checked:after:bg-lime after:h-full after:w-full after:rounded-full after:border-white after:border-[1px]"
             />
-            <label htmlFor={"repayment"} className="hover:cursor-pointer">
+            <label
+              htmlFor={"repayment"}
+              className="hover:cursor-pointer font-bold text-[#133041]"
+            >
               Repayment
             </label>
           </div>
@@ -283,7 +288,10 @@ export default function Form() {
               className="appearance-none w-4 h-4 rounded-full peer border-slate-400 border-[1.5px] checked:border-lime relative
               after:absolute after:top-0 after:left-0 after:bg-white checked:after:bg-lime after:h-full after:w-full after:rounded-full after:border-white after:border-[1px]"
             />
-            <label htmlFor={"interest"} className="hover:cursor-pointer">
+            <label
+              htmlFor={"interest"}
+              className="hover:cursor-pointer font-bold text-[#133041]"
+            >
               Interest Only
             </label>
           </div>
@@ -297,7 +305,6 @@ export default function Form() {
           type="submit"
           className="mt-3 w-full px-[30px] py-4 flex gap-3 items-center rounded-3xl bg-lime hover:bg-lime/50 text-[#133041] hover:text-[#133041]/80 justify-center
           active:scale-95 transition-all duration-150 lg:max-w-[300px]"
-          tabIndex={6}
         >
           <span className="text-white">
             <CalcIcon />
